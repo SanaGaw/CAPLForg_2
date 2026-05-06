@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ComplianceBundle",
+  "type": "object",
+  "required": ["version", "generated_at", "files"],
+  "properties": {
+    "version": { "type": "string", "const": "1.0" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "compliance_mode": { "type": "boolean" },
+    "files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "size_bytes": { "type": "integer" },
+          "sha256": { "type": "string", "pattern": "^[a-fA-F0-9]{64}$" }
+        }
+      }
+    },
+    "audit_summary": {
+      "type": "object",
+      "properties": {
+        "total_decisions": { "type": "integer" },
+        "total_signals_processed": { "type": "integer" },
+        "total_gaps_resolved": { "type": "integer" },
+        "compliance_violations": { "type": "integer" }
+      }
+    }
+  }
+}

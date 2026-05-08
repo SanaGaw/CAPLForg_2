@@ -1,0 +1,111 @@
+Metadata-Version: 2.4
+Name: capl-pipeline
+Version: 2.2.0
+Summary: CAPL test case generation pipeline for CANoe projects
+Author: MiniMax Agent
+License: MIT
+Keywords: canoe,capl,can,testing,automotive
+Classifier: Development Status :: 4 - Beta
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Programming Language :: Python :: 3.10
+Classifier: Programming Language :: Python :: 3.11
+Classifier: Programming Language :: Python :: 3.12
+Classifier: Topic :: Software Development :: Testing
+Classifier: Topic :: Automotive
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: python-docx>=0.8
+Requires-Dist: openpyxl>=3.1
+Requires-Dist: lxml>=4.9
+Requires-Dist: pydantic>=2.0
+Requires-Dist: jsonschema>=4.17
+Requires-Dist: jinja2>=3.1
+Requires-Dist: fastapi>=0.100
+Requires-Dist: uvicorn>=0.22
+Requires-Dist: httpx>=0.24
+Requires-Dist: websockets>=11.0
+Requires-Dist: aiosqlite>=0.19
+Requires-Dist: typer>=0.9
+Requires-Dist: rich>=13.0
+Requires-Dist: azure-identity>=1.14
+Requires-Dist: openai>=1.20
+Requires-Dist: boto3>=1.34
+Requires-Dist: google-cloud-aiplatform>=1.40
+Requires-Dist: psutil>=5.9
+Requires-Dist: python-dotenv>=1.0
+Requires-Dist: pyyaml>=6.0
+Provides-Extra: dev
+Requires-Dist: mypy>=1.5; extra == "dev"
+Requires-Dist: ruff>=0.1; extra == "dev"
+Requires-Dist: pre-commit>=3.5; extra == "dev"
+Provides-Extra: test
+Requires-Dist: pytest>=7.4; extra == "test"
+Requires-Dist: pytest-asyncio>=0.21; extra == "test"
+Requires-Dist: pytest-cov>=4.1; extra == "test"
+Provides-Extra: compliance
+Requires-Dist: rdflib>=6.3; extra == "compliance"
+
+# CAPL Pipeline V2.2
+
+CANoe CAPL Test Case Generation Pipeline
+
+## Overview
+
+CAPL Pipeline is an automated system for generating CAPL test cases from Excel test plans, with support for signal validation, cross-source verification, and LLM-guided configuration resolution.
+
+## Quick Start
+
+```bash
+# Install dependencies
+pip install -e .
+
+# Initialize project
+capl-pipeline init --cfg path/to/project.cfg
+
+# Generate test cases
+capl-pipeline generate path/to/test_plan.xlsx
+
+# Start web interface
+capl-pipeline serve
+```
+
+## Features
+
+- **Parser Suite**: Parse DBC, LDF, vsysvar, CDD, Excel test plans, and STO specifications
+- **Signal Registry**: SQLite-backed signal management with 8-tier cascade lookup
+- **Cross-Validation**: Confidence scoring based on multi-source verification
+- **Config Builder**: LLM-guided Q&A for resolving configuration gaps
+- **Template Engine**: Jinja2 sandboxed CAPL generation
+- **Two-Tier Validation**: Structural checks + CANoe compiler wrapper
+- **Compliance Mode**: Audit logging with JSON-LD traceability
+- **Web UI**: FastAPI + Vue 3 SPA for end-user interaction
+
+## Architecture
+
+```
+capl-pipeline/
+├── src/
+│   ├── parsers/       # File format parsers
+│   ├── core/          # Signal registry, validators
+│   ├── capl/          # CAPL generation
+│   ├── llm/           # LLM integration
+│   ├── web/           # FastAPI + Vue SPA
+│   ├── cli/           # Typer CLI
+│   └── compliance/    # Audit & traceability
+├── config_schemas/    # JSON schema definitions
+├── templates/         # CAPL templates
+└── tests/             # Unit & acceptance tests
+```
+
+## Documentation
+
+See `docs/` directory for detailed documentation:
+- `user_guide.md` - User guide
+- `cli_reference.md` - CLI commands reference
+- `architecture_v2.2.md` - Architecture specification
+- `onboarding_checklist.md` - Getting started checklist
+
+## License
+
+MIT

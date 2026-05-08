@@ -1,4 +1,5 @@
 [project]
+<<<<<<< HEAD
 name = "capl-forge"
 version = "0.1.0"
 description = "CANoe Project Knowledge Extraction and Resolution System"
@@ -28,3 +29,97 @@ target-version = "py310"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+=======
+name = "capl-pipeline"
+version = "2.2.0"
+requires-python = ">=3.10"
+description = "CAPL test case generation pipeline for CANoe projects"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "MiniMax Agent"}
+]
+keywords = ["canoe", "capl", "can", "testing", "automotive"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Automotive",
+]
+
+dependencies = [
+    # Parsing
+    "python-docx>=0.8",          # STO .docx parsing (import as: from docx import Document)
+    "openpyxl>=3.1",             # Excel parsing
+    "lxml>=4.9",                 # XML parsing for CDD/LDF
+
+    # Validation & Schema
+    "pydantic>=2.0",             # Typed models (use Literal, not regex in Field)
+    "jsonschema>=4.17",          # YAML config validation
+
+    # Templates & Generation
+    "jinja2>=3.1",               # CAPL templating (includes SandboxedEnvironment)
+
+    # Web & API
+    "fastapi>=0.100",            # Backend API
+    "uvicorn>=0.22",             # ASGI server
+    "httpx>=0.24",               # Async HTTP client for LLM calls
+    "websockets>=11.0",          # WebSocket support for chat streaming
+
+    # Database
+    "aiosqlite>=0.19",           # Async SQLite for web; sync for core
+
+    # CLI
+    "typer>=0.9",                # Modern CLI framework
+    "rich>=13.0",                # Pretty CLI output
+
+    # Cloud Provider SDKs (Free Studio)
+    "azure-identity>=1.14",      # Azure AD authentication
+    "openai>=1.20",              # Azure OpenAI client
+    "boto3>=1.34",               # AWS Bedrock client
+    "google-cloud-aiplatform>=1.40",  # Vertex AI client
+
+    # Utilities
+    "psutil>=5.9",               # Performance monitoring
+    "python-dotenv>=1.0",        # .env file loading
+    "pyyaml>=6.0",               # YAML config loading
+]
+
+[project.optional-dependencies]
+dev = [
+    "mypy>=1.5",
+    "ruff>=0.1",
+    "pre-commit>=3.5",
+]
+test = [
+    "pytest>=7.4",
+    "pytest-asyncio>=0.21",
+    "pytest-cov>=4.1",
+]
+compliance = ["rdflib>=6.3"]   # JSON-LD validation
+
+[project.scripts]
+capl-pipeline = "src.cli.main:app"
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.10"
+strict = true
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+select = ["E", "F", "I", "N", "W"]
+fixable = ["F"]
+>>>>>>> origin/master

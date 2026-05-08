@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CAPL Pipeline V2.2</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        header { background: #2c3e50; color: white; padding: 20px; margin-bottom: 20px; border-radius: 8px; }
+        header h1 { font-size: 24px; }
+        header p { opacity: 0.8; margin-top: 5px; }
+        .card { background: white; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #2c3e50; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab { padding: 10px 20px; border: none; background: #e0e0e0; border-radius: 4px; cursor: pointer; }
+        .tab.active { background: #3498db; color: white; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
+        .signal-item { background: #f9f9f9; padding: 15px; border-radius: 4px; border-left: 4px solid #3498db; }
+        .signal-item.warning { border-left-color: #f39c12; }
+        .signal-item.danger { border-left-color: #e74c3c; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 3px; font-size: 12px; }
+        .badge.green { background: #27ae60; color: white; }
+        .badge.yellow { background: #f39c12; color: white; }
+        .badge.red { background: #e74c3c; color: white; }
+        .chat-container { height: 400px; overflow-y: auto; border: 1px solid #ddd; border-radius: 4px; padding: 15px; }
+        .message { margin-bottom: 15px; padding: 10px; border-radius: 4px; }
+        .message.user { background: #3498db; color: white; margin-left: 20px; }
+        .message.assistant { background: #ecf0f1; margin-right: 20px; }
+        .chat-input { display: flex; gap: 10px; margin-top: 15px; }
+        .chat-input input { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 4px; }
+        .chat-input button { padding: 10px 20px; background: #3498db; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .error { color: #e74c3c; padding: 10px; background: #fadbd8; border-radius: 4px; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>CAPL Pipeline V2.2</h1>
+            <p>CANoe CAPL Test Case Generation</p>
+        </header>
+
+        <div class="container">
+            <div class="tabs">
+                <button class="tab" :class="{ active: activeTab === 'signals' }" @click="activeTab = 'signals'">Signals</button>
+                <button class="tab" :class="{ active: activeTab === 'gaps' }" @click="activeTab = 'gaps'">Gaps</button>
+                <button class="tab" :class="{ active: activeTab === 'chat' }" @click="activeTab = 'chat'">Chat</button>
+                <button class="tab" :class="{ active: activeTab === 'templates' }" @click="activeTab = 'templates'">Templates</button>
+            </div>
+
+            <!-- Signals Tab -->
+            <div v-if="activeTab === 'signals'" class="card">
+                <h2>Signal Registry</h2>
+                <div class="grid">
+                    <div v-for="signal in signals" :key="signal.name"
+                         class="signal-item"
+                         :class="{ warning: signal.confidence < 0.8, danger: signal.confidence < 0.5 }">
+                        <strong>{{ signal.name }}</strong>
+                        <span v-if="signal.bus_type" class="badge" :class="getStatusClass(signal.confidence)">
+                            {{ signal.bus_type }}
+                        </span>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                            <div v-if="signal.env_var_name">Env: {{ signal.env_var_name }}</div>
+                            <div v-if="signal.sys_var_path">Path: {{ signal.sys_var_path }}</div>
+                            <div>Confidence: {{ (signal.confidence * 100).toFixed(0) }}%</div>
+                        </div>
+                    </div>
+                </div>
+                <div v-if="loading" class="loading">Loading signals...</div>
+                <div v-if="error" class="error">{{ error }}</div>
+            </div>
+
+            <!-- Gaps Tab -->
+            <div v-if="activeTab === 'gaps'" class="card">
+                <h2>Configuration Gaps</h2>
+                <div v-if="gaps.length === 0" class="loading">No gaps found - all signals configured</div>
+                <div v-else class="grid">
+                    <div v-for="gap in gaps" :key="gap.id" class="signal-item warning">
+                        <strong>{{ gap.signal_name || gap.id }}</strong>
+                        <div style="margin-top: 5px; font-size: 12px; color: #666;">
+                            Type: {{ gap.type }}
+                        </div>
+                        <div v-if="gap.confidence" style="font-size: 12px;">
+                            Confidence: {{ (gap.confidence * 100).toFixed(0) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat Tab -->
+            <div v-if="activeTab === 'chat'" class="card">
+                <h2>Gap Resolution Chat</h2>
+                <div class="chat-container" ref="chatContainer">
+                    <div v-for="(msg, idx) in chatMessages" :key="idx"
+                         class="message" :class="msg.role">
+                        <strong v-if="msg.role === 'assistant'">Assistant: </strong>
+                        <strong v-else>You: </strong>
+                        {{ msg.content }}
+                    </div>
+                    <div v-if="chatLoading" class="loading">Processing...</div>
+                </div>
+                <div class="chat-input">
+                    <input v-model="chatInput" @keyup.enter="sendMessage" placeholder="Type your message...">
+                    <button @click="sendMessage" :disabled="chatLoading">Send</button>
+                </div>
+            </div>
+
+            <!-- Templates Tab -->
+            <div v-if="activeTab === 'templates'" class="card">
+                <h2>Available Templates</h2>
+                <div class="grid">
+                    <div v-for="template in templates" :key="template" class="signal-item">
+                        {{ template }}
+                    </div>
+                </div>
+                <div v-if="loading" class="loading">Loading templates...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { createApp, ref, onMounted, nextTick } = Vue;
+
+        createApp({
+            setup() {
+                const activeTab = ref('signals');
+                const signals = ref([]);
+                const gaps = ref([]);
+                const templates = ref([]);
+                const loading = ref(false);
+                const error = ref(null);
+                const chatMessages = ref([{ role: 'assistant', content: 'Welcome to CAPL Pipeline. How can I help you resolve configuration gaps?' }]);
+                const chatInput = ref('');
+                const chatLoading = ref(false);
+                const chatContainer = ref(null);
+
+                const loadSignals = async () => {
+                    try {
+                        loading.value = true;
+                        const response = await axios.get('/api/signals?limit=100');
+                        signals.value = response.data.signals || [];
+                    } catch (e) {
+                        error.value = 'Failed to load signals';
+                    } finally {
+                        loading.value = false;
+                    }
+                };
+
+                const loadGaps = async () => {
+                    try {
+                        const response = await axios.get('/api/config/gaps');
+                        gaps.value = response.data.gaps || [];
+                    } catch (e) {
+                        console.error('Failed to load gaps', e);
+                    }
+                };
+
+                const loadTemplates = async () => {
+                    try {
+                        const response = await axios.get('/api/templates');
+                        templates.value = response.data.templates || [];
+                    } catch (e) {
+                        console.error('Failed to load templates', e);
+                    }
+                };
+
+                const getStatusClass = (confidence) => {
+                    if (confidence >= 0.8) return 'green';
+                    if (confidence >= 0.5) return 'yellow';
+                    return 'red';
+                };
+
+                const sendMessage = async () => {
+                    if (!chatInput.value.trim()) return;
+
+                    chatMessages.value.push({ role: 'user', content: chatInput.value });
+                    chatLoading.value = true;
+                    chatInput.value = '';
+
+                    // Scroll to bottom
+                    await nextTick();
+                    chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+
+                    // Simulate response (in production, would call actual LLM)
+                    setTimeout(() => {
+                        chatMessages.value.push({
+                            role: 'assistant',
+                            content: 'I understand your message. In production, I would process this through the LLM backend to resolve the configuration gap. For now, this is a demo response.'
+                        });
+                        chatLoading.value = false;
+                        nextTick(() => {
+                            chatContainer.value.scrollTop = chatContainer.value.scrollHeight;
+                        });
+                    }, 500);
+                };
+
+                onMounted(() => {
+                    loadSignals();
+                    loadGaps();
+                    loadTemplates();
+                });
+
+                return {
+                    activeTab,
+                    signals,
+                    gaps,
+                    templates,
+                    loading,
+                    error,
+                    chatMessages,
+                    chatInput,
+                    chatLoading,
+                    chatContainer,
+                    getStatusClass,
+                    sendMessage
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

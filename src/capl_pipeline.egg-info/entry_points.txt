@@ -1,0 +1,2 @@
+[console_scripts]
+capl-pipeline = src.cli.main:app

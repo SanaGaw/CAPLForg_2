@@ -1,0 +1,48 @@
+# LLM Provider & Model Routing Configuration
+# Used by src/llm/router.py for multi-provider routing with circuit breakers
+
+llm:
+  preferred:
+    provider: azure
+    model: o3-mini
+    role: primary_reasoning
+    max_context_tokens: 200000
+
+  fallback_chain:
+    - provider: azure
+      model: gpt-5-mini
+      role: general_fallback
+      max_context_tokens: 128000
+    - provider: bedrock
+      model: claude-haiku-4-5
+      role: cross_provider_fallback
+      max_context_tokens: 200000
+    - provider: vertexai
+      model: gemini-2.5-flash
+      role: fast_validation
+      max_context_tokens: 1000000
+
+  task_overrides:
+    gap_resolution:
+      provider: azure
+      model: o3-mini
+      max_context_tokens: 200000
+    helper_drafting:
+      provider: azure
+      model: gpt-5-nano
+      max_context_tokens: 128000
+    validation:
+      provider: vertexai
+      model: gemini-2.5-flash
+      max_context_tokens: 1000000
+
+circuit_breaker:
+  failure_threshold: 3          # Consecutive failures before opening circuit
+  recovery_timeout: 30          # Seconds before attempting recovery
+  half_open_max_calls: 1        # Test calls in half-open state
+
+token_budget:
+  max_signals_per_prompt: 50    # Max signals included in LLM context
+  prompt_overhead_tokens: 500   # Estimated tokens for system prompt + instructions
+  signal_entry_tokens: 80       # Estimated tokens per signal entry
+  compression_threshold: 0.7    # Compress signal list if usage exceeds 70% of context window

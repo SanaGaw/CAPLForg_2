@@ -1,0 +1,26 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "HelperDefinitions",
+  "type": "object",
+  "required": ["version", "helpers"],
+  "properties": {
+    "version": { "type": "string", "const": "1.0" },
+    "helpers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "file", "signature"],
+        "properties": {
+          "name": { "type": "string", "pattern": "^[A-Za-z0-9_]+$" },
+          "file": { "type": "string" },
+          "signature": {
+            "type": "string",
+            "pattern": "^(void|int|long|double|float|char|byte|word|dword|qword|int64) [A-Za-z0-9_]+\\(.*\)\\s*;?$"
+          },
+          "global_apply": { "type": "boolean", "default": false },
+          "version_hash": { "type": "string" }
+        }
+      }
+    }
+  }
+}

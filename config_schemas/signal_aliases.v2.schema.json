@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "SignalAliasesV2",
+  "type": "object",
+  "required": ["version", "aliases"],
+  "properties": {
+    "version": { "type": "string", "const": "2.0" },
+    "aliases": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["target_path", "source"],
+        "properties": {
+          "target_path": { "type": "string", "pattern": "^[A-Za-z0-9_:./\\\\-]+$" },
+          "bus_type": { "enum": ["CAN", "LIN", "FLEXRAY", "ETHERNET"] },
+          "source": { "enum": ["USER", "TEMPLATE", "CROSS_VAL"] },
+          "confidence": { "type": "number", "minimum": 0, "maximum": 1 }
+        }
+      }
+    }
+  },
+  "additionalProperties": false
+}

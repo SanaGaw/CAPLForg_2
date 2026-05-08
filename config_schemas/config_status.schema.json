@@ -1,0 +1,25 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ConfigStatus",
+  "type": "object",
+  "required": ["version", "status", "generated_at"],
+  "properties": {
+    "version": { "type": "string", "const": "1.0" },
+    "status": { "enum": ["draft", "in_review", "approved", "frozen"] },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "signal_count": { "type": "integer", "minimum": 0 },
+    "gap_count": { "type": "integer", "minimum": 0 },
+    "resolved_gaps": { "type": "integer", "minimum": 0 },
+    "deferred_gaps": { "type": "integer", "minimum": 0 },
+    "failed_gaps": { "type": "integer", "minimum": 0 },
+    "iterations_used": { "type": "integer", "minimum": 0 },
+    "validation_errors": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source_files": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

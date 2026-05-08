@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<CANdelaData>
+  <DIAGINST name="ReadData" qualifier="CURRENTDATA" didhex="0xDEAD">
+    <STATICVALUE name="TestDID" length="2"/>
+  </DIAGINST>
+  <DIAGINST name="WriteData" qualifier="STOREDDATAWRITE" didhex="0xBEEF">
+    <STATICVALUE name="WriteDID" length="4"/>
+  </DIAGINST>
+</CANdelaData>

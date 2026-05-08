@@ -1,0 +1,17 @@
+VERSION ""
+
+NS_ :
+    NS_DESC_
+    CM_
+    BA_DEF_
+    BA_
+    VAL_
+    CAT_
+    DEFINES_
+
+EV_ TEST_SIGNAL : 1 [-100|100] "km/h" 0 1 readwrite
+EV_ ANOTHER_VAR : 0 [0|1] "" 0 2 readonly
+
+BA_DEF_ BO_ 536870913 "GenMsgCycleTime" INT 0 65535;
+BA_DEF_ EV_ 536870913 "GenEnvVarClassName" STRING;
+BA_ "GenEnvVarClassName" EV_ TEST_SIGNAL "TestEnvironment";

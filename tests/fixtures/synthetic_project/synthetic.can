@@ -1,0 +1,32 @@
+/* Synthetic CAPL test fixture — no real automotive data */
+
+variables
+{
+    message 0x2A M_Msg_42;
+    float sysvar::Test::Speed;
+}
+
+on envVar EV_TEST_SIGNAL
+{
+    setSignal(FOO_SIGNAL_X, @this);
+    if (@this > 100) {
+        setSignal(BAR_SIGNAL_Y, 1);
+    }
+    M_Msg_42.FOO_SIGNAL_X = @this;
+}
+
+on sysvar sysvar::Test::Speed
+{
+    setSignal(SpeedSignal, @this);
+}
+
+on message 0x2A TestFrame_42
+{
+    float val = this.FOO_SIGNAL_X;
+}
+
+message 0x2A TestFrame_42;
+
+putValue(EV_TEST_SIGNAL, 42);
+@EV_TEST_SIGNAL = 1.0;
+float x = @EV_TEST_SIGNAL;

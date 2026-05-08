@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<VSYSVAR version="1.0">
+  <namespace name="Test">
+    <namespace name="Vehicle">
+      <variable name="Speed" type="float" unit="km/h" minvalue="0" maxvalue="250" startvalue="0" comment="Vehicle speed"/>
+      <variable name="EngineRPM" type="int" unit="rpm" minvalue="0" maxvalue="8000" startvalue="0"/>
+    </namespace>
+    <variable name="TestMode" type="int" minvalue="0" maxvalue="1" startvalue="0" comment="Test mode flag"/>
+  </namespace>
+</VSYSVAR>
